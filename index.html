@@ -1,0 +1,280 @@
+PE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEGVA MODS</title>
+
+<style>
+/* ===== GLOBAL STYLES ===== */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(270deg, #0f2027, #203a43, #2c5364);
+  background-size: 600% 600%;
+  animation: gradientBG 12s ease infinite;
+  color: white;
+}
+
+@keyframes gradientBG {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* ===== GLASS EFFECT ===== */
+.glass {
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  padding: 30px;
+  box-shadow: 0 0 20px rgba(0,255,255,0.3);
+  text-align: center;
+}
+
+/* ===== LOGIN ===== */
+#loginPage h1 {
+  margin-bottom: 20px;
+}
+
+input {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* ===== TELEGRAM BUTTON ===== */
+.telegram {
+  background: linear-gradient(45deg, #0088cc, #00c6ff);
+  color: white;
+  margin-top: 15px;
+}
+
+/* ===== GAME PAGE ===== */
+#gamePage, #hackPage {
+  display: none;
+  padding: 20px;
+}
+
+select, .searchBox {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+/* ===== GRID ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 60px);
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.tile {
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.tile:hover {
+  box-shadow: 0 0 10px cyan;
+}
+
+/* SAFE TILE */
+.safe {
+  color: cyan;
+  animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+  from {box-shadow: 0 0 5px cyan;}
+  to {box-shadow: 0 0 20px cyan;}
+}
+
+/* MINE TILE */
+.mine {
+  color: red;
+}
+
+/* FOOTER */
+footer {
+  margin-top: 20px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .grid {
+    grid-template-columns: repeat(5, 50px);
+  }
+  .tile {
+    width: 50px;
+    height: 50px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="container">
+  <div class="glass">
+    <h1>🔥 JEGVA MODS 🔥</h1>
+    <input type="text" id="username" placeholder="Username"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- GAME SEARCH PAGE -->
+<div id="gamePage">
+  <div class="glass">
+    <h2>Search Your Game</h2>
+
+    <button>Add Your Game 👇</button><br>
+
+    <select>
+      <option>Select Game</option>
+      <option>Mines</option>
+      <option>Casino</option>
+    </select><br>
+
+    <input class="searchBox" type="text" placeholder="Type game name"><br>
+
+    <button onclick="nextPage()">Next</button>
+
+    <br>
+    <button class="telegram" onclick="joinTelegram()">Join Telegram</button>
+  </div>
+</div>
+
+<!-- HACK PAGE -->
+<div id="hackPage">
+  <div class="glass">
+    <h2 id="gameTitle"></h2>
+
+    <div class="grid" id="grid"></div>
+
+    <button onclick="generatePrediction()">Show Safe Mines</button>
+    <button onclick="resetGame()">Reset Game</button>
+
+    <footer>Developed By Jegva mods</footer>
+  </div>
+</div>
+
+<script>
+
+/* LOGIN SYSTEM */
+function login() {
+  let user = document.getElementById("username").value;
+  let pass = document.getElementById("password").value;
+
+  if(user === "jegva" && pass === "jegvamods") {
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("gamePage").style.display = "block";
+  } else {
+    alert("Wrong Login!");
+  }
+}
+
+/* NEXT PAGE */
+function nextPage() {
+  let gameName = document.querySelector(".searchBox").value;
+  document.getElementById("gameTitle").innerText = "Game: " + gameName;
+
+  document.getElementById("gamePage").style.display = "none";
+  document.getElementById("hackPage").style.display = "block";
+
+  createGrid();
+}
+
+/* GRID CREATION */
+let tiles = [];
+
+function createGrid() {
+  let grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  tiles = [];
+
+  for(let i=0;i<25;i++) {
+    let tile = document.createElement("div");
+    tile.classList.add("tile");
+    grid.appendChild(tile);
+    tiles.push(tile);
+  }
+}
+
+/* PREDICTION */
+function generatePrediction() {
+  resetGame();
+
+  let safeIndexes = [];
+
+  while(safeIndexes.length < 5) {
+    let rand = Math.floor(Math.random()*25);
+    if(!safeIndexes.includes(rand)) {
+      safeIndexes.push(rand);
+    }
+  }
+
+  tiles.forEach((tile, index) => {
+    if(safeIndexes.includes(index)) {
+      tile.innerHTML = "💎";
+      tile.classList.add("safe");
+    } else {
+      tile.innerHTML = "💣";
+      tile.classList.add("mine");
+    }
+  });
+}
+
+/* RESET */
+function resetGame() {
+  tiles.forEach(tile => {
+    tile.innerHTML = "";
+    tile.classList.remove("safe","mine");
+  });
+}
+
+/* TELEGRAM */
+function joinTelegram() {
+  window.open("https://t.me/JEGVAGAMER_V2");
+}
+
+</script>
+
+</body>
+</html>
